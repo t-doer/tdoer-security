@@ -1,2 +1,6 @@
 /.idea/
 /tdoer-security.iml
+/bin
+/target
+.settings
+.project
