@@ -13,7 +13,7 @@
 
     <groupId>com.tdoer</groupId>
     <artifactId>tdoer-security</artifactId>
-    <version>0.0.2-RELEASE</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>T-Doer Security</name>
     <description>T-Doer Security Utils and Configuation</description>
     <licenses>
