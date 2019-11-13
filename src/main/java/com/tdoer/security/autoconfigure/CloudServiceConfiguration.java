@@ -1,0 +1,104 @@
+/*
+ * Copyright 2019 T-Doer (tdoer.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package com.tdoer.security.autoconfigure;
+
+import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportAware;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+
+/**
+ * @author Htinker Hu (htinker@163.com)
+ * @create 2019-11-11
+ */
+@Configuration
+public class CloudServiceConfiguration implements ImportAware, BeanPostProcessor, ApplicationContextAware {
+    private Class<?> configType;
+
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private CloudOAuth2ClientProperties clientProperties;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void setImportMetadata(AnnotationMetadata importMetadata) {
+        this.configType = ClassUtils.resolveClassName(importMetadata.getClassName(),
+                null);
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName)
+            throws BeansException {
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName)
+            throws BeansException {
+        if (this.configType.isAssignableFrom(bean.getClass())
+                && bean instanceof WebSecurityConfigurerAdapter) {
+            ProxyFactory factory = new ProxyFactory();
+            factory.setTarget(bean);
+            factory.addAdvice(new ServiceSecurityAdapter(this.applicationContext, clientProperties));
+            bean = factory.getProxy();
+        }
+        return bean;
+    }
+
+    private static class ServiceSecurityAdapter implements MethodInterceptor {
+
+        private CloudServiceConfigurer configurer;
+
+        ServiceSecurityAdapter(ApplicationContext applicationContext,
+                               CloudOAuth2ClientProperties clientProperties) {
+            this.configurer = new CloudServiceConfigurer(applicationContext, clientProperties);
+        }
+
+        @Override
+        public Object invoke(MethodInvocation invocation) throws Throwable {
+            if (invocation.getMethod().getName().equals("init")) {
+                Method method = ReflectionUtils
+                        .findMethod(WebSecurityConfigurerAdapter.class, "getHttp");
+                ReflectionUtils.makeAccessible(method);
+                HttpSecurity http = (HttpSecurity) ReflectionUtils.invokeMethod(method,
+                        invocation.getThis());
+                this.configurer.configure(http);
+            }
+            return invocation.proceed();
+        }
+
+    }
+}
