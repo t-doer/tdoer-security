@@ -14,16 +14,16 @@
  * limitations under the License.
  *
  */
-package com.tdoer.security.autoconfigure;
+package com.tdoer.security.configure;
 
-import com.tdoer.security.oauth2.config.annotation.web.configuration.EnableOAuth2Sso;
+import com.tdoer.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.context.annotation.Import;
 
 /**
  * @author Htinker Hu (htinker@163.com)
- * @create 2019-11-11
+ * @create 2019-11-13
  */
-@EnableOAuth2Sso
+@EnableOAuth2Client
 @Import({CloudServiceConfiguration.class})
-public @interface EnableGatewayService {
+public @interface EnableInfrastructureService {
 }

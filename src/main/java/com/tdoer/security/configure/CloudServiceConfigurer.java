@@ -14,14 +14,16 @@
  * limitations under the License.
  *
  */
-package com.tdoer.security.autoconfigure;
+package com.tdoer.security.configure;
 
 import com.tdoer.bedrock.web.CloudEnvironmentProcessingFilter;
 import com.tdoer.bedrock.web.CloudServiceCheckAccessFilter;
 import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
 import com.tdoer.security.oauth2.client.filter.AccessTokenAuthenticationProcessingFilter;
+import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.util.Assert;
@@ -33,18 +35,24 @@ import org.springframework.util.Assert;
 public class CloudServiceConfigurer {
     private ApplicationContext applicationContext;
     private CloudOAuth2ClientProperties clientProperties;
+    private AuthorizationCodeTokenTemplate tokenTemplate;
+    private ResourceServerTokenServices tokenServices;
 
-    public CloudServiceConfigurer(ApplicationContext applicationContext, CloudOAuth2ClientProperties clientProperties) {
+    public CloudServiceConfigurer(ApplicationContext applicationContext,
+                                  CloudOAuth2ClientProperties clientProperties,
+                                  AuthorizationCodeTokenTemplate tokenTemplate,
+                                  ResourceServerTokenServices tokenServices) {
         Assert.notNull(applicationContext, "ApplicationContext cannot be null");
         Assert.notNull(clientProperties, "CloudOAuth2ClientProperties cannot be null");
+        Assert.notNull(tokenTemplate, "AuthorizationCodeTokenTemplate cannot be null");
+        Assert.notNull(tokenServices, "ResourceServerTokenServices cannot be null");
         this.applicationContext = applicationContext;
         this.clientProperties = clientProperties;
+        this.tokenTemplate = tokenTemplate;
+        this.tokenServices = tokenServices;
     }
 
     public void configure(HttpSecurity http) throws Exception {
-        // Delay the processing of the filter until we know the
-        // SessionAuthenticationStrategy is available:
-        // TODO ADD FILTERS HERE
         http.addFilterBefore(cloudEnvironmentProcessingFilter(), WebAsyncManagerIntegrationFilter.class);
         http.addFilterBefore(cloudServiceCheckAccessFilter(), SecurityContextPersistenceFilter.class);
         http.addFilterAfter(accessTokenAuthenticationProcessingFilter(), SecurityContextPersistenceFilter.class);
@@ -62,6 +70,9 @@ public class CloudServiceConfigurer {
 
     protected AccessTokenAuthenticationProcessingFilter accessTokenAuthenticationProcessingFilter(){
         AccessTokenAuthenticationProcessingFilter filter = new AccessTokenAuthenticationProcessingFilter();
+        filter.setLoginURL(clientProperties.getLoginPath());
+        filter.setTokenTemplate(tokenTemplate);
+        filter.setTokenServices(tokenServices);
         return filter;
     }
 }

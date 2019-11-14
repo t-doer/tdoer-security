@@ -52,7 +52,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({OAuth2ClientConfiguration.class, OAuth2PropertiesConfiguration.class})
+@Import({OAuth2ClientConfiguration.class})
 public @interface EnableOAuth2Client {
 
 }

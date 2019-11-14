@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tdoer.security.autoconfigure;
+package com.tdoer.security.configure;
 
 import com.tdoer.security.crypto.password.MD5PasswordEncoder;
 import org.springframework.context.annotation.Configuration;

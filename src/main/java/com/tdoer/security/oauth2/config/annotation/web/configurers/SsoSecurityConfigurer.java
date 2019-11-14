@@ -18,6 +18,7 @@ package com.tdoer.security.oauth2.config.annotation.web.configurers;
 
 import com.tdoer.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
+import com.tdoer.security.oauth2.provider.authentication.AuthenticationEntryPointRequestMatcher;
 import com.tdoer.security.oauth2.provider.authentication.CloudOAuth2AuthenticationDetailsSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -90,10 +91,20 @@ public class SsoSecurityConfigurer {
         ResourceServerTokenServices tokenServices = this.applicationContext
 				.getBean(ResourceServerTokenServices.class);
 
+        // Request matcher
+        MediaTypeRequestMatcher mediaTypeRequestMatcher = new MediaTypeRequestMatcher(
+				new HeaderContentNegotiationStrategy(), MediaType.APPLICATION_XHTML_XML,
+				MediaType.TEXT_HTML);
+		AuthenticationEntryPointRequestMatcher entryPointRequestMatcher =
+				new AuthenticationEntryPointRequestMatcher(tokenTemplate.getClientProperties().getLoginPath());
+		entryPointRequestMatcher.setMediaTypeRequestMatcher(mediaTypeRequestMatcher);
+
+		// Success handler
 		SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
 		successHandler.setTargetUrlParameter(tokenTemplate.getClientProperties().getTargetUrlParameter());
+
         OAuth2ClientAuthenticationProcessingFilter filter = new OAuth2ClientAuthenticationProcessingFilter(
-				tokenTemplate.getClientProperties().getLoginPath());
+				entryPointRequestMatcher);
 		filter.setTokenTemplate(tokenTemplate);
 		filter.setTokenServices(tokenServices);
 		filter.setApplicationEventPublisher(this.applicationContext);

@@ -38,6 +38,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 import javax.servlet.FilterChain;
@@ -72,6 +73,11 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 		setAuthenticationDetailsSource(authenticationDetailsSource);
 	}
 
+	public OAuth2ClientAuthenticationProcessingFilter(RequestMatcher requestMatcher){
+		super(requestMatcher);
+		setAuthenticationManager(new NoopAuthenticationManager());
+		setAuthenticationDetailsSource(authenticationDetailsSource);
+	}
 
 	/**
 	 * Reference to a CheckTokenServices that can validate an OAuth2AccessToken

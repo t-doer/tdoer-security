@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
-package com.tdoer.security.autoconfigure;
+package com.tdoer.security.configure;
 
 import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
+import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -45,8 +47,23 @@ public class CloudServiceConfiguration implements ImportAware, BeanPostProcessor
 
     private ApplicationContext applicationContext;
 
+    /**
+     * From {@link com.tdoer.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration}
+     */
     @Autowired
     private CloudOAuth2ClientProperties clientProperties;
+
+    /**
+     * From {@link com.tdoer.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration}
+     */
+    @Autowired
+    protected AuthorizationCodeTokenTemplate tokenTemplate;
+
+    /**
+     * From Application
+     */
+    @Autowired
+    protected ResourceServerTokenServices tokenServices;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
@@ -72,7 +89,7 @@ public class CloudServiceConfiguration implements ImportAware, BeanPostProcessor
                 && bean instanceof WebSecurityConfigurerAdapter) {
             ProxyFactory factory = new ProxyFactory();
             factory.setTarget(bean);
-            factory.addAdvice(new ServiceSecurityAdapter(this.applicationContext, clientProperties));
+            factory.addAdvice(new ServiceSecurityAdapter(applicationContext, clientProperties, tokenTemplate, tokenServices));
             bean = factory.getProxy();
         }
         return bean;
@@ -83,8 +100,10 @@ public class CloudServiceConfiguration implements ImportAware, BeanPostProcessor
         private CloudServiceConfigurer configurer;
 
         ServiceSecurityAdapter(ApplicationContext applicationContext,
-                               CloudOAuth2ClientProperties clientProperties) {
-            this.configurer = new CloudServiceConfigurer(applicationContext, clientProperties);
+                               CloudOAuth2ClientProperties clientProperties,
+                               AuthorizationCodeTokenTemplate tokenTemplate,
+                               ResourceServerTokenServices tokenServices) {
+            this.configurer = new CloudServiceConfigurer(applicationContext, clientProperties, tokenTemplate, tokenServices);
         }
 
         @Override

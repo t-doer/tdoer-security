@@ -16,7 +16,6 @@
 
 package com.tdoer.security.oauth2.config.annotation.web.configuration;
 
-import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
 import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
 import com.tdoer.security.oauth2.config.annotation.web.configurers.SsoSecurityConfigurer;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -25,10 +24,8 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.type.AnnotationMetadata;
@@ -36,7 +33,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Method;
 
@@ -56,14 +52,11 @@ public class OAuth2SsoConfiguration
 
 	private ApplicationContext applicationContext;
 
+	/**
+	 * From {@link OAuth2ClientConfiguration}
+	 */
 	@Autowired
-    private CloudOAuth2ClientProperties clientProperties;
-
-	@Bean
-	@LoadBalanced
-	public RestTemplate codeRestTemplate() {
-		return new RestTemplate();
-	}
+	private AuthorizationCodeTokenTemplate tokenTemplate;
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -87,8 +80,6 @@ public class OAuth2SsoConfiguration
 			throws BeansException {
 		if (this.configType.isAssignableFrom(bean.getClass())
 				&& bean instanceof WebSecurityConfigurerAdapter) {
-            AuthorizationCodeTokenTemplate tokenTemplate = new AuthorizationCodeTokenTemplate(clientProperties,
-                    codeRestTemplate());
 			ProxyFactory factory = new ProxyFactory();
 			factory.setTarget(bean);
 			factory.addAdvice(new SsoSecurityAdapter(this.applicationContext, tokenTemplate));
