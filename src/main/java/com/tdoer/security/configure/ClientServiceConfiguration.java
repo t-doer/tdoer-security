@@ -42,7 +42,7 @@ import java.lang.reflect.Method;
  * @create 2019-11-11
  */
 @Configuration
-public class CloudServiceConfiguration implements ImportAware, BeanPostProcessor, ApplicationContextAware {
+public class ClientServiceConfiguration implements ImportAware, BeanPostProcessor, ApplicationContextAware {
     private Class<?> configType;
 
     private ApplicationContext applicationContext;
@@ -97,13 +97,13 @@ public class CloudServiceConfiguration implements ImportAware, BeanPostProcessor
 
     private static class ServiceSecurityAdapter implements MethodInterceptor {
 
-        private CloudServiceConfigurer configurer;
+        private ClientServiceConfigurer configurer;
 
         ServiceSecurityAdapter(ApplicationContext applicationContext,
                                CloudOAuth2ClientProperties clientProperties,
                                AuthorizationCodeTokenTemplate tokenTemplate,
                                ResourceServerTokenServices tokenServices) {
-            this.configurer = new CloudServiceConfigurer(applicationContext, clientProperties, tokenTemplate, tokenServices);
+            this.configurer = new ClientServiceConfigurer(applicationContext, clientProperties, tokenTemplate, tokenServices);
         }
 
         @Override

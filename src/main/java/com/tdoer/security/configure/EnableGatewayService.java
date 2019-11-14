@@ -24,6 +24,6 @@ import org.springframework.context.annotation.Import;
  * @create 2019-11-11
  */
 @EnableOAuth2Sso
-@Import({CloudServiceConfiguration.class})
+@Import({ClientServiceConfiguration.class})
 public @interface EnableGatewayService {
 }

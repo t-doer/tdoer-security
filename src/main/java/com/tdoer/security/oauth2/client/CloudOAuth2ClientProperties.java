@@ -31,6 +31,8 @@ import java.util.List;
 public class CloudOAuth2ClientProperties extends BaseOAuth2ProtectedResourceDetails {
     public static final String DEFAULT_LOGIN_PATH = "/login";
 
+    public static final String DEFAULT_LOGOUT_PATH = "/logout";
+
     // ImplicitResourceDetails or AuthorizationCodeResourceDetails specifically
     private String preEstablishedRedirectUri;
 
@@ -45,11 +47,14 @@ public class CloudOAuth2ClientProperties extends BaseOAuth2ProtectedResourceDeta
 
     private String targetUrlParameter = "redirect_url";
 
+    private String authLogoutParameter = "authLogoutUrl";
     /**
      * Path to the login page, i.e. the one that triggers the redirect to the OAuth2
      * Authorization Server.
      */
     private String loginPath = DEFAULT_LOGIN_PATH;
+
+    private String logoutPath = DEFAULT_LOGOUT_PATH;
 
     @Override
     public String getId() {
@@ -91,6 +96,22 @@ public class CloudOAuth2ClientProperties extends BaseOAuth2ProtectedResourceDeta
 
     public void setLoginPath(String loginPath) {
         this.loginPath = loginPath;
+    }
+
+    public String getLogoutPath() {
+        return logoutPath;
+    }
+
+    public void setLogoutPath(String logoutPath) {
+        this.logoutPath = logoutPath;
+    }
+
+    public String getAuthLogoutParameter() {
+        return authLogoutParameter;
+    }
+
+    public void setAuthLogoutParameter(String authLogoutParameter) {
+        this.authLogoutParameter = authLogoutParameter;
     }
 
     /**

@@ -24,6 +24,6 @@ import org.springframework.context.annotation.Import;
  * @create 2019-11-13
  */
 @EnableOAuth2Client
-@Import({CloudServiceConfiguration.class})
+@Import({ClientServiceConfiguration.class})
 public @interface EnableInfrastructureService {
 }

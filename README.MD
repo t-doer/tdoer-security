@@ -54,6 +54,9 @@ security:
       authorizationServerLogoutUri: http://auth2dev.bybon.cn/logout
       # current service's login path
       loginPath: /login
+      # current service's logout path
+      logoutPath: /logout
+
 ```
 
 
