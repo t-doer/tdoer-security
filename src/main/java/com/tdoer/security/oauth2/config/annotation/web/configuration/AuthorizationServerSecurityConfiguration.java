@@ -15,6 +15,8 @@
  */
 package com.tdoer.security.oauth2.config.annotation.web.configuration;
 
+import com.tdoer.bedrock.web.CloudEnvironmentProcessingFilter;
+import com.tdoer.bedrock.web.CloudServiceCheckAccessFilter;
 import com.tdoer.security.oauth2.config.annotation.configuration.ClientDetailsServiceConfiguration;
 import com.tdoer.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import com.tdoer.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
@@ -29,6 +31,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import java.util.Collections;
 import java.util.List;
@@ -83,6 +87,10 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 			UserDetailsService userDetailsService = http.getSharedObject(UserDetailsService.class);
 			endpoints.getEndpointsConfigurer().userDetailsService(userDetailsService);
 		}
+
+		http.addFilterBefore(cloudEnvironmentProcessingFilter(), WebAsyncManagerIntegrationFilter.class);
+		http.addFilterBefore(cloudServiceCheckAccessFilter(), SecurityContextPersistenceFilter.class);
+
 		// @formatter:off
 		http
 			.authorizeRequests()
@@ -104,4 +112,14 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 		}
 	}
 
+
+	protected CloudEnvironmentProcessingFilter cloudEnvironmentProcessingFilter(){
+		CloudEnvironmentProcessingFilter filter = new CloudEnvironmentProcessingFilter();
+		return filter;
+	}
+
+	protected CloudServiceCheckAccessFilter cloudServiceCheckAccessFilter(){
+		CloudServiceCheckAccessFilter filter = new CloudServiceCheckAccessFilter();
+		return filter;
+	}
 }
