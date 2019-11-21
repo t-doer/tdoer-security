@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 the original author or authors.
+ * Copyright 2019 T-Doer (tdoer.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.tdoer.security.oauth2.client.filter;
@@ -52,9 +53,10 @@ import java.io.IOException;
  * authentication object into the SecurityContext.
  *
  * The filter will interspect "login" request
- * 
- * @author Vidya Valmikinathan
- * 
+ *
+ *
+ * @author Htinker Hu (htinker@163.com)
+ * @create 2017-09-19
  */
 public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
