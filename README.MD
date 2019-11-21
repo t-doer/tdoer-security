@@ -3,7 +3,7 @@
 T-Doer Security is to secure T-Doer Bedrock services based on OAuth 2.0.
 
 To enable T-Doer Security, T-Doer Bedrock Services (Gateway, Authorization, Business and Infrastructure),
-must implement and declare a bean of `com.tdoer.security.oauth2.provider.token.ResourceServerRefreshTokenServices`
+must implement and declare a bean of `com.tdoer.security.oauth2.common.token.RefreshableTokenServices`
 which is used to read stored `org.springframework.security.oauth2.provider.OAuth2Authentication`,
 `org.springframework.security.oauth2.common.OAuth2AccessToken`, and `org.springframework.security.oauth2.common.OAuth2RefreshToken` 
 from access token string.
@@ -30,7 +30,7 @@ Seq | Filter | Comment
 
 #### 1.2.2 Beans
 
-- com.tdoer.security.oauth2.provider.token.ResourceServerRefreshTokenServices, needed by
+- com.tdoer.security.oauth2.common.token.RefreshableTokenServices, needed by
  OAuth2ClientAuthenticationProcessingFilter, AccessTokenAuthenticationProcessingFilter
 
 #### 1.2.3 application.yml
@@ -45,13 +45,13 @@ security:
       # revoke token, DELETE http method
       revokeTokenUri: http://tdoer-auth/oauth/users/{user}/tokens/{token}
       # redirect to and ask user to authorize the client
-      userAuthorizationUri: http://auth2dev.bybon.cn/oauth/authorize
+      userAuthorizationUri: http://auth2dev.tdoer.net/oauth/authorize
       # clientId/client secret
       clientAuthenticationScheme: header
       # token
       authenticationScheme: header
       # redirect to and tell authorization server to logout, ie., revoke token
-      authorizationServerLogoutUri: http://auth2dev.bybon.cn/logout
+      authorizationServerLogoutUri: http://auth2dev.tdoer.net/logout
       # current service's login path
       loginPath: /login
       # current service's logout path
@@ -560,12 +560,12 @@ security:
     client:
       accessTokenUri: http://tdoer-auth/oauth/token
       revokeTokenUri: http://tdoer-auth/oauth/users/{user}/tokens/{token}
-      userAuthorizationUri: http://auth2dev.bybon.cn/oauth/authorize
+      userAuthorizationUri: http://auth2dev.tdoer.net/oauth/authorize
       # clientId/client secret
       clientAuthenticationScheme: header
       # token
       authenticationScheme: header
-      authorizationServerLogoutUri: http://auth2dev.bybon.cn/logout
+      authorizationServerLogoutUri: http://auth2dev.tdoer.net/logout
       loginPath: /login
     resource:
       userInfoUri: http://tdoer-auth/me

@@ -30,7 +30,7 @@ public class AuthenticationEntryPointRequestMatcher implements RequestMatcher {
 
     protected MediaTypeRequestMatcher mediaTypeRequestMatcher;
 
-    protected RequestMatcher urlRequestMatcher;
+    protected AntPathRequestMatcher urlRequestMatcher;
 
     public AuthenticationEntryPointRequestMatcher(String loginPath){
         urlRequestMatcher = new AntPathRequestMatcher(loginPath);

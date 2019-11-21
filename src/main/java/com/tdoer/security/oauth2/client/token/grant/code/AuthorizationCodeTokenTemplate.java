@@ -3,6 +3,8 @@ package com.tdoer.security.oauth2.client.token.grant.code;
 import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
 import com.tdoer.security.oauth2.client.CloudResourceDetailsFactory;
 import com.tdoer.security.oauth2.client.token.AccessTokenRequestFactory;
+import com.tdoer.security.oauth2.common.token.RefreshableTokenTemplate;
+import com.tdoer.security.oauth2.common.token.TokenTemplate;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -12,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class AuthorizationCodeTokenTemplate {
+public class AuthorizationCodeTokenTemplate implements RefreshableTokenTemplate {
 
     protected CloudOAuth2ClientProperties clientProperties;
 
@@ -26,19 +28,22 @@ public class AuthorizationCodeTokenTemplate {
         this.tokenProvider = new CloudAuthorizationCodeTokenProvider(restTemplate);
     }
 
-    public OAuth2AccessToken obtainAccessToken(HttpServletRequest request){
+    @Override
+    public OAuth2AccessToken createAccessToken(HttpServletRequest request){
         AuthorizationCodeResourceDetails resourceDetails = CloudResourceDetailsFactory.newAuthorizationCodeResourceDetails(clientProperties);
         AccessTokenRequest accessTokenRequest = AccessTokenRequestFactory.create(request);
 
         return tokenProvider.obtainAccessToken(resourceDetails, accessTokenRequest);
     }
 
+    @Override
     public OAuth2AccessToken refreshAccessToken(HttpServletRequest request, OAuth2RefreshToken refreshToken){
         AuthorizationCodeResourceDetails resourceDetails = CloudResourceDetailsFactory.newAuthorizationCodeResourceDetails(clientProperties);
         AccessTokenRequest accessTokenRequest = AccessTokenRequestFactory.create(request);
         return tokenProvider.refreshAccessToken(resourceDetails, refreshToken, accessTokenRequest);
     }
 
+    @Override
     public CloudOAuth2ClientProperties getClientProperties() {
         return clientProperties;
     }

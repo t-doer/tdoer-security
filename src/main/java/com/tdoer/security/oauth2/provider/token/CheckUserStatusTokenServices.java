@@ -16,6 +16,7 @@
 package com.tdoer.security.oauth2.provider.token;
 
 import com.tdoer.bedrock.security.UserDetails;
+import com.tdoer.security.oauth2.common.token.ReadingRefreshTokenServices;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
@@ -31,14 +32,14 @@ import org.springframework.util.Assert;
  * @author Htinker Hu (htinker@163.com)
  * @create 2017-09-19
  */
-public class AuthorizationServerCheckUserStatusTokenServices implements ResourceServerTokenServices, ReadingRefreshTokenServices {
+public class CheckUserStatusTokenServices implements ResourceServerTokenServices, ReadingRefreshTokenServices {
     private RedisTokenServices redisTokenServices;
 
     private UserDetailsService userDetailsService;
 
     private UserDetailsChecker userDetailsChecker;
 
-    public AuthorizationServerCheckUserStatusTokenServices(RedisTokenServices redisTokenServices, UserDetailsService userDetailsService) {
+    public CheckUserStatusTokenServices(RedisTokenServices redisTokenServices, UserDetailsService userDetailsService) {
         Assert.notNull(redisTokenServices, "RedisTokenService cannot be null");
         Assert.notNull(userDetailsService, "UserDetailsService cannot be null");
 

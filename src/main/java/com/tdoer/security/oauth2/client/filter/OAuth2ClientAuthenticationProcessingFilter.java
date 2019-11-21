@@ -117,7 +117,7 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 
 		OAuth2AccessToken accessToken;
 		try {
-			accessToken = tokenTemplate.obtainAccessToken(request);
+			accessToken = tokenTemplate.createAccessToken(request);
 
 		} catch (OAuth2Exception e) {
 			BadCredentialsException bad = new BadCredentialsException("Could not obtain access token", e);

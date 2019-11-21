@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 T-Doer (tdoer.com).
+ * Copyright 2019 T-Doer (tdoer.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,19 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
-package com.tdoer.security.oauth2.provider.token;
+package com.tdoer.security.oauth2.common.token;
 
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Htinker Hu (htinker@163.com)
- * @create 2017-09-19
+ * @create 2019-11-17
  */
-public interface ReadingRefreshTokenServices {
-    /**
-     * Read stored {@link OAuth2RefreshToken} of specific access token
-     * @param token Access token, cannot be blank
-     * @return OAuth2RefreshToken or <code>null</code>
-     */
-    OAuth2RefreshToken readRefreshTokenForToken(String token);
+public interface TokenTemplate {
+
+    OAuth2AccessToken createAccessToken(HttpServletRequest request);
+
+    CloudOAuth2ClientProperties getClientProperties();
 }

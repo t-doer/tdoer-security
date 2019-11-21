@@ -17,12 +17,12 @@ package com.tdoer.security.oauth2.provider;
 
 import com.tdoer.bedrock.Platform;
 import com.tdoer.bedrock.tenant.TenantClient;
+import com.tdoer.utils.id.GUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.util.Assert;
 /**
  * @author Htinker Hu (htinker@163.com)
  * @create 2017-09-19
@@ -39,12 +39,10 @@ public class CloudClientDetailsService implements ClientDetailsService {
      */
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+        Long tenantId = GUID.parseTenantIdFromClientGUID(clientId);
+        TenantClient client = Platform.getRentalCenter().getTenantClient(tenantId, clientId);
 
-        TenantClient client = Platform.getCurrentEnvironment().getTenantClient();
-
-        logger.info("Current tenant client's GUID and request client Id are: {} - {}", client.getGuid(), clientId);
-        Assert.isTrue(client.getGuid().equals(clientId), "Tenant client's GUID dose not matched, there must be " +
-                "some request goes wrong");
+        logger.debug("Loaded TenantClient for client Id: {} - {}", clientId, client);
 
         return new CloudClientDetails(client);
     }

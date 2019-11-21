@@ -21,6 +21,7 @@ import com.tdoer.bedrock.product.ClientServiceInstallation;
 import com.tdoer.bedrock.tenant.TenantClient;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.util.Assert;
 
 import java.util.*;
 /**
@@ -31,6 +32,7 @@ public class CloudClientDetails implements ClientDetails {
     private TenantClient tenantClient;
 
     public CloudClientDetails(TenantClient tenantClient) {
+        Assert.notNull(tenantClient, "TenantClient cannot be null");
         this.tenantClient = tenantClient;
     }
 

@@ -20,11 +20,12 @@ import com.tdoer.bedrock.Platform;
 import com.tdoer.bedrock.service.Service;
 import com.tdoer.bedrock.service.ServiceType;
 import com.tdoer.security.oauth2.OAuth2Constants;
-import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
 import com.tdoer.security.oauth2.common.AccessTokenThreadLocalHolder;
+import com.tdoer.security.oauth2.common.token.RefreshableTokenTemplate;
+import com.tdoer.security.oauth2.common.token.TokenTemplate;
 import com.tdoer.security.oauth2.provider.authentication.CloudOAuth2AuthenticationDetails;
 import com.tdoer.security.oauth2.provider.authentication.CloudOAuth2AuthenticationDetailsSource;
-import com.tdoer.security.oauth2.provider.token.ReadingRefreshTokenServices;
+import com.tdoer.security.oauth2.common.token.ReadingRefreshTokenServices;
 import com.tdoer.security.oauth2.util.OAuth2AuthenticationUtil;
 import com.tdoer.springboot.util.WebUtil;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class AccessTokenAuthenticationProcessingFilter extends GenericFilterBean
 
 	protected static Logger logger = LoggerFactory.getLogger(AccessTokenAuthenticationProcessingFilter.class);
 
-	protected AuthorizationCodeTokenTemplate tokenTemplate;
+	protected TokenTemplate tokenTemplate;
 
 	protected ResourceServerTokenServices tokenServices;
 
@@ -96,8 +97,8 @@ public class AccessTokenAuthenticationProcessingFilter extends GenericFilterBean
 	 *
 	 * @param tokenTemplate a code template, cannot be <code>null</code>
 	 */
-	public void setTokenTemplate(AuthorizationCodeTokenTemplate tokenTemplate) {
-		Assert.notNull(tokenTemplate, "AuthorizationCodeTokenTemplate cannot be null");
+	public void setTokenTemplate(TokenTemplate tokenTemplate) {
+		Assert.notNull(tokenTemplate, "TokenTemplate cannot be null");
 		this.tokenTemplate = tokenTemplate;
 	}
 
@@ -213,17 +214,21 @@ public class AccessTokenAuthenticationProcessingFilter extends GenericFilterBean
 				logger.info("Expired access token and its OAuth2RefreshToken: {} -> {}", accessToken, refreshToken);
 
 				if(refreshToken != null){
-					logger.debug("Trying to refresh the expired access token: {} with refresh token: {}", accessToken, refreshToken);
-					OAuth2AccessToken newToken = null;
-					try{
-						newToken = refreshToken(request, token, refreshToken);
-					}catch(Exception ex){
-						logger.error("Failed to refresh the token (" + accessToken + ") with refresh token (" + refreshToken + ")",
-								ex);
-					}
-					if(newToken != null){
-						logger.info("Token was refreshed successfully: {} -> {}", accessToken, newToken);
-						accessToken = newToken;
+					if(tokenTemplate instanceof RefreshableTokenTemplate){
+						logger.debug("Trying to refresh the expired access token: {} with refresh token: {}", accessToken, refreshToken);
+						OAuth2AccessToken newToken = null;
+						try{
+							newToken = refreshToken(request, token, refreshToken);
+						}catch(Exception ex){
+							logger.error("Failed to refresh the token (" + accessToken + ") with refresh token (" + refreshToken + ")",
+									ex);
+						}
+						if(newToken != null){
+							logger.info("Token was refreshed successfully: {} -> {}", accessToken, newToken);
+							accessToken = newToken;
+						}
+					}else{
+						logger.debug("Token template dose not support refreshing expired access token: {}", accessToken);
 					}
 				}else{
 					logger.info("Token '{}' is expired without refresh token", accessToken);
@@ -250,7 +255,7 @@ public class AccessTokenAuthenticationProcessingFilter extends GenericFilterBean
 			}
 		}
 
-		return tokenTemplate.refreshAccessToken(request, refreshToken);
+		return ((RefreshableTokenTemplate)tokenTemplate).refreshAccessToken(request, refreshToken);
 	}
 
 	protected void checkClientDetails(OAuth2Authentication auth, OAuth2AccessToken token) {

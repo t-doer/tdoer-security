@@ -22,38 +22,60 @@ import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
 import com.tdoer.security.oauth2.client.OAuth2LogoutHandler;
 import com.tdoer.security.oauth2.client.filter.AccessTokenAuthenticationProcessingFilter;
 import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
+import com.tdoer.security.oauth2.common.token.TokenTemplate;
+import com.tdoer.security.oauth2.provider.authentication.RedirectUriAuthenticationFailureHandler;
 import com.tdoer.security.oauth2.provider.error.AuthenticationEntryPointDelegator;
+import com.tdoer.security.oauth2.provider.error.RedirectUriAuthenticationEntryPoint;
+import com.tdoer.security.oauth2.provider.error.ResourceServerOAuth2AuthenticationEntryPoint;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.util.Assert;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Htinker Hu (htinker@163.com)
  * @create 2019-11-11
  */
-public class ClientServiceConfigurer {
+public class ProviderServiceConfigurer {
+    private String loginPage;
     private ApplicationContext applicationContext;
     private CloudOAuth2ClientProperties clientProperties;
-    private AuthorizationCodeTokenTemplate tokenTemplate;
+    private TokenTemplate tokenTemplate;
     private ResourceServerTokenServices tokenServices;
     private OAuth2LogoutHandler logoutHandler;
+    private AuthenticationSuccessHandler successHandler;
+    private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource;
 
-    public ClientServiceConfigurer(ApplicationContext applicationContext) {
+    public ProviderServiceConfigurer(String loginPage,
+                                     ApplicationContext applicationContext) {
+
+
+        Assert.hasText(loginPage, "Login page is required, cannot be blank");
         Assert.notNull(applicationContext, "ApplicationContext cannot be null");
+
+        this.loginPage = loginPage;
         this.applicationContext = applicationContext;
         this.clientProperties = applicationContext.getBean(CloudOAuth2ClientProperties.class);
         this.tokenTemplate = applicationContext.getBean(AuthorizationCodeTokenTemplate.class);
         this.tokenServices = applicationContext.getBean(ResourceServerTokenServices.class);
         this.logoutHandler = applicationContext.getBean(OAuth2LogoutHandler.class);
+        this.successHandler = applicationContext.getBean(AuthenticationSuccessHandler.class);
+        this.authenticationDetailsSource = applicationContext.getBean(AuthenticationDetailsSource.class);
 
         Assert.notNull(clientProperties, "CloudOAuth2ClientProperties bean in ApplicationContext is required");
         Assert.notNull(tokenTemplate, "AuthorizationCodeTokenTemplate bean in ApplicationContext is required");
         Assert.notNull(tokenServices, "ResourceServerTokenServices bean in ApplicationContext is required");
         Assert.notNull(logoutHandler, "OAuth2LogoutHandler bean in ApplicationContext is required");
+        Assert.notNull(successHandler, "AuthenticationSuccessHandler bean in ApplicationContext is required");
+        Assert.notNull(authenticationDetailsSource, "AuthenticationDetailsSource bean in ApplicationContext is required");
     }
 
     public void configure(HttpSecurity http) throws Exception {
@@ -61,22 +83,31 @@ public class ClientServiceConfigurer {
         http.addFilterBefore(cloudServiceCheckAccessFilter(), SecurityContextPersistenceFilter.class);
         http.addFilterAfter(accessTokenAuthenticationProcessingFilter(), SecurityContextPersistenceFilter.class);
 
-        String logoutSuccessUrl =
-                "/?" + clientProperties.getAuthLogoutParameter() + "=" + clientProperties.getAuthorizationServerLogoutUri();
         http
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                // Redirect request to login if authentiation exception
-                .exceptionHandling()
-                .authenticationEntryPoint(new AuthenticationEntryPointDelegator(clientProperties.getLoginPath()))                .and()
                 // Logout needs to finish 3 steps
                 // 1. Clean access token in cookie, in LogoutHandler
                 // 2. Ask authorization server to revoke the access token, in LogoutHandler
                 // 3. Tell client to sent logout request to "passport"
-                .logout().logoutUrl(clientProperties.getLogoutPath()).logoutSuccessUrl(logoutSuccessUrl).addLogoutHandler(logoutHandler)
+                .logout().addLogoutHandler(logoutHandler)
                 .and()
-                // Disable csrf
+                .formLogin().authenticationDetailsSource(authenticationDetailsSource)
+                .loginPage(loginPage)
+                .successHandler(successHandler)
+                .failureHandler(new RedirectUriAuthenticationFailureHandler(loginPage + "?error=401"))
+                .and()
+                // Redirect request to login if authentiation exception
+                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
+                .and()
                 .csrf().disable();
+    }
+
+    public AuthenticationEntryPoint authenticationEntryPoint(){
+        return new AuthenticationEntryPointDelegator(
+                new ResourceServerOAuth2AuthenticationEntryPoint(),
+                new RedirectUriAuthenticationEntryPoint(loginPage)
+        );
     }
 
     protected CloudEnvironmentProcessingFilter cloudEnvironmentProcessingFilter(){

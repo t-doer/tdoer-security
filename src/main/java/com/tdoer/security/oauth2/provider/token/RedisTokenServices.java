@@ -18,6 +18,7 @@ import com.tdoer.bedrock.Platform;
 import com.tdoer.bedrock.product.SessionPolicy;
 import com.tdoer.security.oauth2.OAuth2Constants;
 import com.tdoer.security.oauth2.common.exception.OAuth2AccessBlockedException;
+import com.tdoer.security.oauth2.common.token.ReadingRefreshTokenServices;
 import com.tdoer.security.oauth2.provider.token.store.redis.RedisTokenStore;
 import com.tdoer.security.oauth2.util.OAuth2AuthenticationUtil;
 import org.springframework.beans.factory.InitializingBean;

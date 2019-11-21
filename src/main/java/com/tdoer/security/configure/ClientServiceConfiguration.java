@@ -89,7 +89,7 @@ public class ClientServiceConfiguration implements ImportAware, BeanPostProcesso
                 && bean instanceof WebSecurityConfigurerAdapter) {
             ProxyFactory factory = new ProxyFactory();
             factory.setTarget(bean);
-            factory.addAdvice(new ServiceSecurityAdapter(applicationContext, clientProperties, tokenTemplate, tokenServices));
+            factory.addAdvice(new ServiceSecurityAdapter(applicationContext));
             bean = factory.getProxy();
         }
         return bean;
@@ -99,11 +99,8 @@ public class ClientServiceConfiguration implements ImportAware, BeanPostProcesso
 
         private ClientServiceConfigurer configurer;
 
-        ServiceSecurityAdapter(ApplicationContext applicationContext,
-                               CloudOAuth2ClientProperties clientProperties,
-                               AuthorizationCodeTokenTemplate tokenTemplate,
-                               ResourceServerTokenServices tokenServices) {
-            this.configurer = new ClientServiceConfigurer(applicationContext, clientProperties, tokenTemplate, tokenServices);
+        ServiceSecurityAdapter(ApplicationContext applicationContext) {
+            this.configurer = new ClientServiceConfigurer(applicationContext);
         }
 
         @Override

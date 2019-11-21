@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 T-Doer (tdoer.com).
+ * Copyright 2019 T-Doer (tdoer.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
-package com.tdoer.security.oauth2.provider.token;
+package com.tdoer.security.configure;
 
-import com.tdoer.security.oauth2.common.token.ReadingRefreshTokenServices;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.context.annotation.Import;
+
 /**
  * @author Htinker Hu (htinker@163.com)
- * @create 2017-09-19
+ * @create 2019-11-13
  */
-public interface ResourceServerRefreshTokenServices extends ResourceServerTokenServices, ReadingRefreshTokenServices {
+@Import({ProviderServiceConfiguration.class, AuthorizationServerConfiguration.class})
+public @interface EnableAuthorizationService {
 }

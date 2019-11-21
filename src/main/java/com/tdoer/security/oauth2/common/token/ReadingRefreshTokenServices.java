@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tdoer.security.oauth2.provider.token;
+package com.tdoer.security.oauth2.common.token;
 
-import com.tdoer.security.oauth2.common.token.ReadingRefreshTokenServices;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+
 /**
  * @author Htinker Hu (htinker@163.com)
  * @create 2017-09-19
  */
-public interface ResourceServerRefreshTokenServices extends ResourceServerTokenServices, ReadingRefreshTokenServices {
+public interface ReadingRefreshTokenServices extends ResourceServerTokenServices {
+    /**
+     * Read stored {@link OAuth2RefreshToken} of specific access token
+     * @param token Access token, cannot be blank
+     * @return OAuth2RefreshToken or <code>null</code>
+     */
+    OAuth2RefreshToken readRefreshTokenForToken(String token);
 }

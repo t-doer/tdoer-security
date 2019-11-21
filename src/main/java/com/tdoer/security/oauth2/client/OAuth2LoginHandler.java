@@ -54,7 +54,9 @@ public class OAuth2LoginHandler {
     public void login(HttpServletRequest req, HttpServletResponse rsp, String login, String password) {
         // Obtain token
         logger.info("Obtaining token for user login: {}", login);
-        OAuth2AccessToken accessToken = tokenTemplate.obtainAccessToken(req, login, password);
+        req.setAttribute("username", login);
+        req.setAttribute("password", password);
+        OAuth2AccessToken accessToken = tokenTemplate.createAccessToken(req);
         logger.info("Obtained token for user '{}': {}", login, accessToken);
 
         // Set for down streaming
