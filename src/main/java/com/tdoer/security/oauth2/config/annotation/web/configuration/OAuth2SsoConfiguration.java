@@ -78,13 +78,13 @@ public class OAuth2SsoConfiguration
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName)
 			throws BeansException {
-//		if (this.configType.isAssignableFrom(bean.getClass())
-//				&& bean instanceof WebSecurityConfigurerAdapter) {
-//			ProxyFactory factory = new ProxyFactory();
-//			factory.setTarget(bean);
-//			factory.addAdvice(new SsoSecurityAdapter(this.applicationContext, tokenTemplate));
-//			bean = factory.getProxy();
-//		}
+		if (this.configType.isAssignableFrom(bean.getClass())
+				&& bean instanceof WebSecurityConfigurerAdapter) {
+			ProxyFactory factory = new ProxyFactory();
+			factory.setTarget(bean);
+			factory.addAdvice(new SsoSecurityAdapter(this.applicationContext, tokenTemplate));
+			bean = factory.getProxy();
+		}
 		return bean;
 	}
 
