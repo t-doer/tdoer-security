@@ -18,10 +18,15 @@ package com.tdoer.security.configure;
 
 import org.springframework.context.annotation.Import;
 
+import java.lang.annotation.*;
+
 /**
  * @author Htinker Hu (htinker@163.com)
  * @create 2019-11-13
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 @Import({ProviderServiceConfiguration.class, AuthorizationServerConfiguration.class})
 public @interface EnableAuthorizationService {
 }

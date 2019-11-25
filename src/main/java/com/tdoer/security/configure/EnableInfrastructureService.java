@@ -19,10 +19,15 @@ package com.tdoer.security.configure;
 import com.tdoer.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.context.annotation.Import;
 
+import java.lang.annotation.*;
+
 /**
  * @author Htinker Hu (htinker@163.com)
  * @create 2019-11-13
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 @EnableOAuth2Client
 @Import({ClientServiceConfiguration.class})
 public @interface EnableInfrastructureService {

@@ -50,11 +50,10 @@ public class SsoSecurityConfigurer {
 	private ApplicationContext applicationContext;
 	private AuthorizationCodeTokenTemplate tokenTemplate;
 
-	public SsoSecurityConfigurer(ApplicationContext applicationContext, AuthorizationCodeTokenTemplate tokenTemplate) {
+	public SsoSecurityConfigurer(ApplicationContext applicationContext) {
         Assert.notNull(applicationContext, "ApplicationContext cannot be null");
-        Assert.notNull(tokenTemplate, "AuthorizationCodeTokenTemplate cannot be null");
 		this.applicationContext = applicationContext;
-		this.tokenTemplate = tokenTemplate;
+		this.tokenTemplate = applicationContext.getBean(AuthorizationCodeTokenTemplate.class);
 	}
 
 	public void configure(HttpSecurity http) throws Exception {

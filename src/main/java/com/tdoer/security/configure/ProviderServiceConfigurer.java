@@ -23,6 +23,7 @@ import com.tdoer.security.oauth2.client.OAuth2LogoutHandler;
 import com.tdoer.security.oauth2.client.filter.AccessTokenAuthenticationProcessingFilter;
 import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
 import com.tdoer.security.oauth2.common.token.TokenTemplate;
+import com.tdoer.security.oauth2.provider.authentication.OAuth2ProviderLogoutHandler;
 import com.tdoer.security.oauth2.provider.authentication.RedirectUriAuthenticationFailureHandler;
 import com.tdoer.security.oauth2.provider.error.AuthenticationEntryPointDelegator;
 import com.tdoer.security.oauth2.provider.error.RedirectUriAuthenticationEntryPoint;
@@ -34,6 +35,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.util.Assert;
@@ -50,7 +52,7 @@ public class ProviderServiceConfigurer {
     private CloudOAuth2ClientProperties clientProperties;
     private TokenTemplate tokenTemplate;
     private ResourceServerTokenServices tokenServices;
-    private OAuth2LogoutHandler logoutHandler;
+    private OAuth2ProviderLogoutHandler logoutHandler;
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource;
 
@@ -64,9 +66,9 @@ public class ProviderServiceConfigurer {
         this.loginPage = loginPage;
         this.applicationContext = applicationContext;
         this.clientProperties = applicationContext.getBean(CloudOAuth2ClientProperties.class);
-        this.tokenTemplate = applicationContext.getBean(AuthorizationCodeTokenTemplate.class);
+        this.tokenTemplate = applicationContext.getBean(TokenTemplate.class);
         this.tokenServices = applicationContext.getBean(ResourceServerTokenServices.class);
-        this.logoutHandler = applicationContext.getBean(OAuth2LogoutHandler.class);
+        this.logoutHandler = applicationContext.getBean(OAuth2ProviderLogoutHandler.class);
         this.successHandler = applicationContext.getBean(AuthenticationSuccessHandler.class);
         this.authenticationDetailsSource = applicationContext.getBean(AuthenticationDetailsSource.class);
 

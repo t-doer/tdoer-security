@@ -62,6 +62,11 @@ public class OAuth2ClientConfiguration {
 	}
 
 	@Bean
+	public CloudOAuth2ClientContext cloudOAuth2ClientContext(){
+		return new CloudOAuth2ClientContext();
+	}
+
+	@Bean
 	public AuthorizationCodeTokenTemplate authorizationCodeTokenTemplate(CloudOAuth2ClientProperties clientProperties){
 		return new AuthorizationCodeTokenTemplate(clientProperties,	restTemplate());
 	}
@@ -109,40 +114,4 @@ public class OAuth2ClientConfiguration {
 		registration.setOrder(security.getFilter().getOrder() - 10);
 		return registration;
 	}
-    /*
-     * Customization:
-     *
-     * See AccessTokenRequestFactory
-     *
-     * - Htinker Hu, 2019/7/4
-     */
-	@Bean
-	@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
-	protected AccessTokenRequest accessTokenRequest(HttpServletRequest httpServletRequest) {
-	    return AccessTokenRequestFactory.create(httpServletRequest);
-	}
-	
-	@Configuration
-	protected static class OAuth2ClientContextConfiguration {
-		
-		@Resource
-		@Qualifier("accessTokenRequest")
-		private AccessTokenRequest accessTokenRequest;
-
-		/*
-		 * Customization:
-		 *
-		 * Sessionless Web Application, make OAuth2ClientContext request-based scope with a
-		 * customized DefaultOAuth2ClientContext.
-		 *
-		 * - Htinker Hu, 2019/7/4
-		 */
-		@Bean
-		@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
-		public CloudOAuth2ClientContext oauth2ClientContext() {
-			return new CloudOAuth2ClientContext(accessTokenRequest);
-		}
-		
-	}
-
 }

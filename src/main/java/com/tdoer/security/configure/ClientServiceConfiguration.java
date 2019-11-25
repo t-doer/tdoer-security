@@ -16,8 +16,10 @@
  */
 package com.tdoer.security.configure;
 
+import com.tdoer.bedrock.service.ServiceType;
 import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
 import com.tdoer.security.oauth2.client.token.grant.code.AuthorizationCodeTokenTemplate;
+import com.tdoer.security.oauth2.config.annotation.web.configurers.SsoSecurityConfigurer;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
@@ -44,6 +46,8 @@ import java.lang.reflect.Method;
 @Configuration
 public class ClientServiceConfiguration implements ImportAware, BeanPostProcessor, ApplicationContextAware {
     private Class<?> configType;
+
+    private ServiceType serviceType;
 
     private ApplicationContext applicationContext;
 
@@ -74,6 +78,13 @@ public class ClientServiceConfiguration implements ImportAware, BeanPostProcesso
     public void setImportMetadata(AnnotationMetadata importMetadata) {
         this.configType = ClassUtils.resolveClassName(importMetadata.getClassName(),
                 null);
+        if(importMetadata.hasAnnotation(EnableGatewayService.class.getName())){
+            serviceType = ServiceType.GATEWAY;
+        }else if(importMetadata.hasAnnotation(EnableBusinessService.class.getName())){
+            serviceType = ServiceType.BUSINESS;
+        }else if(importMetadata.hasAnnotation(EnableInfrastructureService.class.getName())){
+            serviceType = ServiceType.INFRASTRUCTURE;
+        }
     }
 
     @Override
@@ -89,7 +100,7 @@ public class ClientServiceConfiguration implements ImportAware, BeanPostProcesso
                 && bean instanceof WebSecurityConfigurerAdapter) {
             ProxyFactory factory = new ProxyFactory();
             factory.setTarget(bean);
-            factory.addAdvice(new ServiceSecurityAdapter(applicationContext));
+            factory.addAdvice(new ServiceSecurityAdapter(serviceType, applicationContext));
             bean = factory.getProxy();
         }
         return bean;
@@ -97,10 +108,15 @@ public class ClientServiceConfiguration implements ImportAware, BeanPostProcesso
 
     private static class ServiceSecurityAdapter implements MethodInterceptor {
 
-        private ClientServiceConfigurer configurer;
+        private ClientServiceConfigurer clientServiceConfigurer;
 
-        ServiceSecurityAdapter(ApplicationContext applicationContext) {
-            this.configurer = new ClientServiceConfigurer(applicationContext);
+        private SsoSecurityConfigurer ssoSecurityConfigurer;
+
+        ServiceSecurityAdapter(ServiceType serviceType, ApplicationContext applicationContext) {
+            this.clientServiceConfigurer = new ClientServiceConfigurer(applicationContext);
+            if(serviceType == ServiceType.GATEWAY){
+                ssoSecurityConfigurer = new SsoSecurityConfigurer(applicationContext);
+            }
         }
 
         @Override
@@ -111,7 +127,10 @@ public class ClientServiceConfiguration implements ImportAware, BeanPostProcesso
                 ReflectionUtils.makeAccessible(method);
                 HttpSecurity http = (HttpSecurity) ReflectionUtils.invokeMethod(method,
                         invocation.getThis());
-                this.configurer.configure(http);
+                if(ssoSecurityConfigurer != null){
+                    ssoSecurityConfigurer.configure(http);
+                }
+                clientServiceConfigurer.configure(http);
             }
             return invocation.proceed();
         }

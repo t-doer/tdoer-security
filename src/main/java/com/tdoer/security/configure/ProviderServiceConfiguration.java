@@ -19,7 +19,6 @@ package com.tdoer.security.configure;
 import com.tdoer.bedrock.security.CloudWebAuthenticationDetailsSource;
 import com.tdoer.security.oauth2.client.CloudOAuth2ClientProperties;
 import com.tdoer.security.oauth2.common.token.TokenTemplate;
-import com.tdoer.security.oauth2.provider.CloudClientDetailsService;
 import com.tdoer.security.oauth2.provider.authentication.CheckUserStatusAuthenticationProvider;
 import com.tdoer.security.oauth2.provider.authentication.OAuth2ProviderLogoutHandler;
 import com.tdoer.security.oauth2.provider.authentication.OAuth2TokenAuthenticationSuccessHandler;
@@ -76,6 +75,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
+ * Provider service configurtion depends on the properties and beans outside:
+ *
+ * <ul>
+ *    <li>Application property: tdoer.auth.loginPage, which should be defined in application.yml</li>
+ *    <li>Bean: org.springframework.data.redis.core.StringRedisTemplate, which is from
+ *    com.tdoer.security.oauth2.config.annotation.configuration.ClientDetailsServiceConfiguration</li>
+ *    <li>Bean: org.springframework.security.core.userdetails.UserDetailsService, which is from application's
+ *    component scan</li>
+ *    <li>Bean: org.springframework.security.authentication.AuthenticationManager, which is from application's
+ *    component scan</li>
+ * </ul>
+ *
  * @author Htinker Hu (htinker@163.com)
  * @create 2019-11-11
  */
@@ -93,12 +104,6 @@ public class ProviderServiceConfiguration implements ImportAware, BeanPostProces
     @Bean
     public CloudOAuth2ClientProperties cloudOAuth2ClientProperties(){
         return new CloudOAuth2ClientProperties();
-    }
-
-    @Bean
-    @Primary
-    public ClientDetailsService clientDetailsService(){
-        return new CloudClientDetailsService();
     }
 
     // StringRedisTemplate is from auto config of spring-boot-starter-data-redis
@@ -178,7 +183,7 @@ public class ProviderServiceConfiguration implements ImportAware, BeanPostProces
                                      AuthorizationCodeServices authorizationCodeServices,
                                      ClientDetailsService clientDetailsService,
                                      OAuth2RequestFactory requestFactory,
-                                     AuthenticationManager authenticationManager
+                                     AuthenticationManager authenticationManager // check user/password
                                      ){
         ArrayList<TokenGranter> tokenGranters = new ArrayList<>(5);
         tokenGranters.add(new AuthorizationCodeTokenGranter(redisTokenServices, authorizationCodeServices, clientDetailsService, requestFactory));
@@ -211,7 +216,7 @@ public class ProviderServiceConfiguration implements ImportAware, BeanPostProces
 
     // Needed by {@link ProviderServiceConfigurer}
     @Bean
-    public LogoutHandler logoutHandler(RedisTokenServices redisTokenServices) {
+    public OAuth2ProviderLogoutHandler logoutHandler(RedisTokenServices redisTokenServices) {
         OAuth2ProviderLogoutHandler handler = new OAuth2ProviderLogoutHandler();
         handler.setTokenServices(redisTokenServices);
         return handler;
