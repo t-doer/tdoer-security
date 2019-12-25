@@ -115,7 +115,7 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
+			throws AuthenticationException, IOException {
 
 		OAuth2AccessToken accessToken;
 		try {
