@@ -16,6 +16,9 @@
 package com.tdoer.security.configure;
 
 import com.tdoer.security.crypto.password.MD5PasswordEncoder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -29,6 +32,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 @Order(-10)
 public class ManagementConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Bean
+    @RefreshScope
+    @ConfigurationProperties(prefix = "tdoer.management")
+    protected SystemOperator systemOperator(){
+        return new SystemOperator();
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -47,10 +57,11 @@ public class ManagementConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        SystemOperator operator = systemOperator();
         auth.inMemoryAuthentication()
                 .passwordEncoder(new MD5PasswordEncoder())
-                .withUser("tdoer")
-                .password("fb3e9deaa6bffee9315c56acab2bd1e7") // md5 of operator@tdoer
+                .withUser(operator.getUserName())
+                .password(operator.getPassword())
                 .roles("SYSTEM_OPERATOR");
     }
 }
